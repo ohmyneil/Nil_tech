@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Portfolio",
+      "type": "pwa-chrome",
+      "request": "launch",
+      "preLaunchTask": "Start portfolio server",
+      "url": "http://127.0.0.1:8080/",
+      "webRoot": "${workspaceFolder}"
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Portfolio of NEIL IVAN V. TANAMOR, Software Engineer.">
+<title>NEIL IVAN V. TANAMOR | Software Engineer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#about">Skip to content</a>
+<header class="site-header">
+  <div class="header-inner shell">
+    <a class="brand" href="#top" aria-label="Back to the top">
+      <span class="brand-mark">NIT</span>
+      <span>NEIL TANAMOR</span>
+    </a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a href="#about">about</a>
+      <a href="#skills">stack</a>
+      <a href="#projects">credentials</a>
+      <a href="#experience">projects</a>
+    </nav>
+    <div class="header-tools">
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false" title="Toggle color theme">◐</button>
+      <a class="contact-link" href="#contact">contact ↗</a>
+    </div>
+  </div>
+</header>
+
+<main class="shell" id="top">
+  <section class="hero" aria-labelledby="hero-name">
+    <div class="portrait-wrap" data-reveal>
+      <img class="portrait" id="profile-photo" src="assets/images/profile.jpg" alt="Portrait of NEIL IVAN V. TANAMOR">
+    </div>
+    <div class="hero-copy">
+      <p class="eyebrow" data-reveal>information technology graduate</p>
+      <h1 id="hero-name" data-reveal>Neil Ivan<span>V. Tanamor</span></h1>
+      <p class="hero-tagline" id="hero-tagline" data-reveal></p>
+      <div class="hero-actions" data-reveal>
+        <a class="button primary" href="#projects">view credentials <span aria-hidden="true">↗</span></a>
+        <a class="button" href="#contact">get in touch <span aria-hidden="true">↗</span></a>
+        <a class="button" id="resume-link" href="#" download hidden>resume <span aria-hidden="true">↓</span></a>
+      </div>
+      <p class="hero-note" data-reveal>portfolio / 2026 / built with intent</p>
+    </div>
+  </section>
+
+  <section class="section" id="about" aria-labelledby="about-title">
+    <p class="section-label" data-reveal>01 / about</p>
+    <div>
+      <h2 class="section-title" id="about-title" data-reveal>About<br><em>me.</em></h2>
+      <div class="about-layout">
+        <div class="about-copy" id="about-body" data-reveal></div>
+        <aside class="about-summary" data-reveal aria-label="Profile details">
+          <div class="summary-row"><span>role</span><strong id="about-role"></strong></div>
+          <div class="summary-row"><span>approach</span><strong>clear + reliable</strong></div>
+          <div class="summary-row"><span>status</span><strong>open to work</strong></div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="skills" aria-labelledby="skills-title">
+    <p class="section-label" data-reveal>02 / tech stack</p>
+    <div>
+      <h2 class="section-title" id="skills-title" data-reveal>Tech<br><em>stack.</em></h2>
+      <div class="stack" id="skills-body"></div>
+    </div>
+  </section>
+
+  <section class="section" id="projects" aria-labelledby="projects-title">
+    <p class="section-label" data-reveal>03 / education</p>
+    <div>
+      <h2 class="section-title" id="projects-title" data-reveal>Education &amp;<br><em>credentials.</em></h2>
+      <div class="project-list" id="projects-body"></div>
+    </div>
+  </section>
+
+  <section class="section" id="experience" aria-labelledby="experience-title">
+    <p class="section-label" data-reveal>04 / projects</p>
+    <div>
+      <h2 class="section-title" id="experience-title" data-reveal>Projects<br><em>I made.</em></h2>
+      <div class="experience-list" id="experience-body"></div>
+    </div>
+  </section>
+
+  <section class="section contact-section" id="contact" aria-labelledby="contact-title">
+    <p class="section-label" data-reveal>05 / contact</p>
+    <div class="contact-block">
+      <h2 class="contact-heading" id="contact-title" data-reveal>Let's make<br><span>something useful.</span></h2>
+      <div class="contact-side" id="contact-body" data-reveal></div>
+    </div>
+  </section>
+</main>
+
+<footer class="shell">
+  <span id="footer-note"></span>
+  <span>open to meaningful work</span>
+</footer>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
+
