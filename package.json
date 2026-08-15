@@ -4,6 +4,8 @@
   "private": true,
   "description": "Portfolio website for Neil Ivan V. Tanamor.",
   "scripts": {
+    "build": "node scripts/build.js",
+    "dev:worker": "node scripts/build.js && npx --yes wrangler dev --port 8787",
     "start": "node server.js"
   },
   "dependencies": {
