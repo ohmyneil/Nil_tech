@@ -102,55 +102,13 @@
   </section>
 </main>
 
-<footer class="shell">
-  <span id="footer-note"></span>
-  <span>open to meaningful work</span>
+<footer class="site-footer shell">
+  <a class="footer-signature" href="#top" aria-label="Back to the top">
+    <span class="footer-name">Neil Ivan V. Tanamor</span>
+    <span class="footer-separator" aria-hidden="true">/</span>
+    <time class="footer-year" datetime="2026">2026</time>
+  </a>
 </footer>
-
-<button class="ai-launcher" id="ai-launcher" type="button" aria-controls="ai-dialog" aria-expanded="false" aria-haspopup="dialog" aria-label="Open PAKO, Neil's portfolio assistant" title="Ask PAKO">
-  <span class="pako-avatar pako-avatar--launcher" aria-hidden="true"></span>
-</button>
-
-<dialog class="ai-dialog" id="ai-dialog" aria-labelledby="ai-assistant-title">
-  <div class="ai-dialog-shell">
-    <header class="ai-dialog-header">
-      <div class="pako-dialog-brand">
-        <span class="pako-avatar pako-avatar--dialog" aria-hidden="true"></span>
-        <p class="ai-kicker">NEIL / PAKO</p>
-      </div>
-      <button class="ai-close" id="ai-close" type="button" aria-label="Close PAKO">×</button>
-    </header>
-    <div class="ai-dialog-layout">
-      <div class="ai-intro">
-        <h2>Meet<br><span>PAKO.</span></h2>
-        <p>PAKO is my portfolio guide. Ask about my skills, education, projects, or the best way to get in touch.</p>
-        <div class="ai-suggestions" aria-label="Suggested questions">
-          <button class="ai-suggestion" type="button" data-question="What technologies does Neil use?"><span>What technologies does Neil use?</span><span aria-hidden="true">↗</span></button>
-          <button class="ai-suggestion" type="button" data-question="Tell me about HandyHome Batangas."><span>Tell me about HandyHome Batangas.</span><span aria-hidden="true">↗</span></button>
-          <button class="ai-suggestion" type="button" data-question="Tell me about EnergiX."><span>Tell me about EnergiX.</span><span aria-hidden="true">↗</span></button>
-        </div>
-      </div>
-      <section class="ai-assistant" aria-labelledby="ai-assistant-title">
-        <header class="ai-assistant-header">
-          <h3 id="ai-assistant-title">PAKO</h3>
-          <span>online</span>
-        </header>
-        <div class="ai-messages" id="ai-messages" role="log" aria-live="polite" aria-relevant="additions text" aria-busy="false">
-          <article class="ai-message ai-message--assistant ai-message--welcome">
-            <span class="ai-message-label">PAKO</span>
-            <p>Hi — I’m PAKO. Ask me about Neil's background, tech stack, or projects.</p>
-          </article>
-        </div>
-        <form class="ai-composer" id="ai-form">
-          <label class="visually-hidden" for="ai-question">Ask PAKO a question about Neil's portfolio</label>
-          <textarea id="ai-question" name="question" rows="1" maxlength="600" placeholder="Ask PAKO about my work…" aria-describedby="ai-input-note" required></textarea>
-          <button class="ai-send" id="ai-send" type="submit">Ask PAKO <span aria-hidden="true">↗</span></button>
-          <p class="ai-input-note" id="ai-input-note">Press Enter to send. Use Shift + Enter for a new line.</p>
-        </form>
-      </section>
-    </div>
-  </div>
-</dialog>
 
 <script type="module" src="js/main.js"></script>
 </body>

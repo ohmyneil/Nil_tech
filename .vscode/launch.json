@@ -2,15 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Run Portfolio + PAKO",
-      "type": "pwa-chrome",
-      "request": "launch",
-      "preLaunchTask": "Start PAKO development server",
-      "url": "http://localhost:8787/",
-      "webRoot": "${workspaceFolder}"
-    },
-    {
-      "name": "Run Static Portfolio",
+      "name": "Run Portfolio",
       "type": "pwa-chrome",
       "request": "launch",
       "preLaunchTask": "Start portfolio server",

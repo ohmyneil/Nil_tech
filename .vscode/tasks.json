@@ -2,32 +2,6 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Start PAKO development server",
-      "type": "process",
-      "command": "npm.cmd",
-      "args": ["run", "dev:worker"],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "isBackground": true,
-      "problemMatcher": {
-        "owner": "pako-worker",
-        "pattern": {
-          "regexp": "^$"
-        },
-        "background": {
-          "activeOnStart": true,
-          "beginsPattern": ".*(wrangler|Starting local server).*",
-          "endsPattern": ".*Ready on.*"
-        }
-      },
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      }
-    },
-    {
       "label": "Start portfolio server",
       "type": "shell",
       "command": "node",

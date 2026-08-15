@@ -279,19 +279,6 @@ async function handleContactRequest(request, response) {
   }
 }
 
-function handleLocalAiRequest(request, response) {
-  if (request.method !== 'POST') {
-    response.setHeader('Allow', 'POST');
-    sendError(response, 405, 'Method not allowed.');
-    return;
-  }
-
-  sendJson(response, 503, {
-    ok: false,
-    error: 'PAKO is available through the Cloudflare Worker. Run npm.cmd run dev:worker to use it locally.'
-  });
-}
-
 function serveStaticFile(request, response) {
   if (!['GET', 'HEAD'].includes(request.method)) {
     response.setHeader('Allow', 'GET, HEAD');
@@ -345,11 +332,6 @@ const server = http.createServer(function(request, response) {
 
   if (requestPath === '/api/contact') {
     handleContactRequest(request, response);
-    return;
-  }
-
-  if (requestPath === '/api/ai') {
-    handleLocalAiRequest(request, response);
     return;
   }
 

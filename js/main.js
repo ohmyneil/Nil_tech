@@ -33,7 +33,6 @@ document.getElementById("hero-name").innerHTML =
   "<span>" + escapeHtml(nameParts.slice(splitAt).join(" ")) + "</span>";
 document.getElementById("hero-tagline").textContent = DATA.tagline;
 document.getElementById("about-role").textContent = DATA.role;
-document.getElementById("footer-note").textContent = DATA.footerNote + " / " + new Date().getFullYear();
 
 const profileOriginal = document.getElementById("profile-original");
 const profileIllustration = document.getElementById("profile-illustration");
@@ -203,166 +202,6 @@ function copyEmail() {
 }
 document.getElementById("copy-email").addEventListener("click", copyEmail);
 
-function appendAiMessage(messages, kind, content) {
-  const message = document.createElement("article");
-  message.className = "ai-message ai-message--" + kind;
-
-  const label = document.createElement("span");
-  label.className = "ai-message-label";
-  label.textContent = kind === "user" ? "You" : kind === "error" ? "PAKO · unavailable" : "PAKO";
-
-  const text = document.createElement("p");
-  text.textContent = content;
-
-  message.append(label, text);
-  messages.appendChild(message);
-  return message;
-}
-
-function setupPortfolioAssistant() {
-  const dialog = document.getElementById("ai-dialog");
-  const launcher = document.getElementById("ai-launcher");
-  const closeButton = document.getElementById("ai-close");
-  const form = document.getElementById("ai-form");
-  const questionInput = document.getElementById("ai-question");
-  const sendButton = document.getElementById("ai-send");
-  const messages = document.getElementById("ai-messages");
-  const suggestions = Array.from(document.querySelectorAll("[data-question]"));
-
-  function syncDialogState(isOpen) {
-    if (!launcher) return;
-    launcher.setAttribute("aria-expanded", String(isOpen));
-    launcher.setAttribute("aria-label", isOpen ? "Close PAKO" : "Open PAKO, Neil's portfolio assistant");
-  }
-
-  function closeDialog() {
-    if (!dialog) return;
-    if (dialog.open && typeof dialog.close === "function") {
-      dialog.close();
-      return;
-    }
-    dialog.removeAttribute("open");
-    syncDialogState(false);
-    launcher && launcher.focus();
-  }
-
-  function openDialog() {
-    if (!dialog) return;
-    if (!dialog.open && typeof dialog.showModal === "function") {
-      dialog.showModal();
-    } else {
-      dialog.setAttribute("open", "");
-    }
-    syncDialogState(true);
-    window.requestAnimationFrame(function() { questionInput && questionInput.focus(); });
-  }
-
-  if (dialog && launcher) {
-    launcher.addEventListener("click", openDialog);
-    dialog.addEventListener("close", function() {
-      syncDialogState(false);
-      launcher.focus();
-    });
-    dialog.addEventListener("click", function(event) {
-      if (event.target === dialog) closeDialog();
-    });
-  }
-  if (closeButton) closeButton.addEventListener("click", closeDialog);
-
-  if (!form || !questionInput || !sendButton || !messages) return;
-
-  let isAsking = false;
-
-  function shouldStayAtLatestMessage() {
-    return messages.scrollHeight - messages.scrollTop - messages.clientHeight < 72;
-  }
-
-  function scrollToLatestMessage(shouldScroll) {
-    if (!shouldScroll) return;
-    messages.scrollTo({
-      top: messages.scrollHeight,
-      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"
-    });
-  }
-
-  function setAskingState(isBusy) {
-    isAsking = isBusy;
-    messages.setAttribute("aria-busy", String(isBusy));
-    sendButton.disabled = isBusy;
-    sendButton.setAttribute("aria-label", isBusy ? "PAKO is thinking" : "Ask PAKO");
-    sendButton.innerHTML = isBusy ? "PAKO is thinking..." : 'Ask PAKO <span aria-hidden="true">↗</span>';
-  }
-
-  async function askAI(question) {
-    const normalizedQuestion = typeof question === "string" ? question.replace(/\s+/g, " ").trim() : "";
-    if (!normalizedQuestion || isAsking) return;
-
-    const keepAtLatestMessage = shouldStayAtLatestMessage();
-    appendAiMessage(messages, "user", normalizedQuestion);
-    const thinkingMessage = appendAiMessage(messages, "thinking", "Thinking...");
-    questionInput.value = "";
-    setAskingState(true);
-    scrollToLatestMessage(keepAtLatestMessage);
-
-    const controller = new AbortController();
-    const timeoutId = window.setTimeout(function() { controller.abort(); }, 25000);
-
-    try {
-      const response = await fetch("/api/ai", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: normalizedQuestion }),
-        signal: controller.signal
-      });
-      const data = await response.json().catch(function() { return {}; });
-      if (!response.ok) {
-        const localDevelopment = ["localhost", "127.0.0.1"].includes(window.location.hostname);
-        if (localDevelopment && (response.status === 404 || response.status === 405 || response.status === 503)) {
-          throw new Error("PAKO needs Cloudflare Workers locally. Run npm run dev:worker.");
-        }
-        throw new Error(data.error || data.message || "Sorry, I couldn't answer right now.");
-      }
-
-      const answer = typeof data.answer === "string" ? data.answer.trim() : "";
-      if (!answer) throw new Error("Sorry, I couldn't answer right now.");
-
-      thinkingMessage.remove();
-      appendAiMessage(messages, "assistant", answer);
-    } catch (error) {
-      thinkingMessage.remove();
-      const errorMessage = error && error.name === "AbortError"
-        ? "This is taking longer than expected. Please try again."
-        : error && error.message && !/failed to fetch|networkerror/i.test(error.message)
-          ? error.message
-          : "Sorry, I couldn't answer right now. Please try again shortly.";
-      appendAiMessage(messages, "error", errorMessage);
-      console.error("PAKO request failed:", error);
-    } finally {
-      window.clearTimeout(timeoutId);
-      setAskingState(false);
-      scrollToLatestMessage(keepAtLatestMessage);
-      questionInput.focus();
-    }
-  }
-
-  form.addEventListener("submit", function(event) {
-    event.preventDefault();
-    askAI(questionInput.value);
-  });
-
-  questionInput.addEventListener("keydown", function(event) {
-    if (event.key !== "Enter" || event.shiftKey || event.isComposing) return;
-    event.preventDefault();
-    form.requestSubmit();
-  });
-
-  suggestions.forEach(function(button) {
-    button.addEventListener("click", function() {
-      askAI(button.dataset.question || "");
-    });
-  });
-}
-
 function setupImageTransitions() {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const images = Array.from(document.querySelectorAll(".portrait, .project-shot img"));
@@ -504,7 +343,6 @@ setupImageTransitions();
 setupProfileSequence();
 setupStackLogos();
 setupScrollSpy();
-setupPortfolioAssistant();
 void initializeFirebase();
 
 const themeToggle = document.getElementById("theme-toggle");

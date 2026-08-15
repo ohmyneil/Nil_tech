@@ -126,6 +126,5 @@ export const DATA = {
     email: "neilvanromanat@gmail.com",
     phone: "+63 945 678 6282",
     location: "Malvar, Batangas, Philippines"
-  },
-  footerNote: "Designed and built by NEIL IVAN V. TANAMOR."
+  }
 };
