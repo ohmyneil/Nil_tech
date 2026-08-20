@@ -79,35 +79,103 @@ document.getElementById("projects-body").innerHTML = DATA.projects.map(function(
     '<span class="project-arrow" aria-hidden="true">↗</span></article>';
 }).join("");
 
-document.getElementById("experience-body").innerHTML = DATA.experience.map(function(item, index) {
-  const points = item.points.map(function(point) {
-    return "<li>" + escapeHtml(point) + "</li>";
+function renderProjectPlaceholder(project, deviceType) {
+  const placeholder = project.placeholder || {};
+  const allowedKinds = ["service", "parking", "health", "energy"];
+  const kind = allowedKinds.includes(placeholder.kind) ? placeholder.kind : "service";
+  const metrics = Array.isArray(placeholder.metrics) ? placeholder.metrics.slice(0, 2) : [];
+  const metricMarkup = metrics.map(function(metric, index) {
+    return '<span class="project-placeholder-metric project-placeholder-metric--' + (index + 1) + '">' + escapeHtml(metric) + "</span>";
   }).join("");
-  const title = item.url
-    ? '<a href="' + escapeHtml(item.url) + '" target="_blank" rel="noopener">' + escapeHtml(item.title) + ' ↗</a>'
-    : escapeHtml(item.title);
-  const projectArrow = item.url ? '<span class="experience-arrow" aria-hidden="true">↗</span>' : "";
-  const gallery = item.images && item.images.length
-    ? '<div class="project-gallery project-gallery--' + item.images.length + '" aria-label="' + escapeHtml(item.title) + ' project screenshots">' +
-      item.images.map(function(image, index) {
-        const shotClass = index === 0 ? "project-shot project-shot-main" : "project-shot";
-        const shotStyle = ' style="--shot-delay:' + (120 + (index * 90)) + 'ms"';
-        const figure = '<figure><img src="' + escapeHtml(image.src) + '" alt="' + escapeHtml(image.alt) + '" loading="lazy" decoding="async">' +
-          '<figcaption>' + escapeHtml(image.label) + '</figcaption></figure>';
-        return item.url
-          ? '<a class="' + shotClass + '" href="' + escapeHtml(item.url) + '" target="_blank" rel="noopener"' + shotStyle + '>' + figure + '</a>'
-          : '<div class="' + shotClass + '"' + shotStyle + '>' + figure + '</div>';
-      }).join("") +
-      '</div>'
-    : "";
-  const delay = Math.min(index * 80, 160);
-  return '<article class="experience" data-reveal data-reveal-delay="' + delay + '">' +
-    '<div class="experience-date">' + escapeHtml(item.meta) + "</div>" +
-    "<div><h3>" + title + "</h3>" +
-    '<p class="experience-meta">' + escapeHtml(item.version) + "</p></div>" +
-    projectArrow +
-    '<ul class="experience-points">' + points + "</ul>" + gallery + "</article>";
-}).join("");
+  const title = placeholder.title || project.title;
+
+  return '<div class="device-placeholder project-placeholder-' + kind + ' project-placeholder-' + deviceType + '" aria-hidden="true">' +
+    '<div class="project-placeholder-topbar"><span></span><span></span><span></span></div>' +
+    '<div class="project-placeholder-body">' +
+      '<p class="project-placeholder-eyebrow">' + escapeHtml(placeholder.eyebrow || project.title) + "</p>" +
+      '<h4>' + escapeHtml(title) + "</h4>" +
+      '<div class="project-placeholder-metrics">' + metricMarkup + "</div>" +
+      '<div class="project-placeholder-chart"><span></span><span></span><span></span><span></span><span></span></div>' +
+      '<div class="project-placeholder-list"><span></span><span></span><span></span></div>' +
+    "</div>" +
+  "</div>";
+}
+
+function renderDeviceScreen(project, visual, deviceType) {
+  if (visual && visual.src) {
+    const fit = visual.fit === "contain" ? "contain" : "cover";
+    const projectScreenClass = project.id === "handyhome" && deviceType === "desktop"
+      ? " device-screen-image--handyhome-dashboard"
+      : "";
+    return '<img class="device-screen-image device-screen-image--' + fit + projectScreenClass + '" src="' + escapeHtml(visual.src) + '" alt="' + escapeHtml(visual.alt || (project.title + " preview")) + '" loading="lazy" decoding="async">';
+  }
+  return renderProjectPlaceholder(project, deviceType);
+}
+
+function renderDeviceCaption(visual, description) {
+  if (visual && visual.src) return "";
+  return '<figcaption class="visually-hidden">' + escapeHtml(description) + "</figcaption>";
+}
+
+function renderProjectAction(label, url, isPrimary) {
+  if (!url || url === "#") return "";
+  return '<a class="showcase-action' + (isPrimary ? " showcase-action-primary" : "") + '" href="' + escapeHtml(url) + '" target="_blank" rel="noopener">' +
+    escapeHtml(label) + ' <span aria-hidden="true">&nearr;</span></a>';
+}
+
+function renderProjectShowcase(project, index) {
+  const projectId = String(project.id || ("project-" + index)).replace(/[^a-z0-9_-]/gi, "");
+  const isHandyHome = project.id === "handyhome";
+  const number = String(index + 1).padStart(2, "0");
+  const technologies = Array.isArray(project.technologies) ? project.technologies : [];
+  const focus = Array.isArray(project.focus) ? project.focus : [];
+  const tags = technologies.length ? technologies : focus;
+  const tagLabel = technologies.length ? "Technology" : "Focus";
+  const tagMarkup = tags.map(function(tag) {
+    return "<li>" + escapeHtml(tag) + "</li>";
+  }).join("");
+  const features = (Array.isArray(project.features) ? project.features : []).map(function(feature) {
+    return "<li>" + escapeHtml(feature) + "</li>";
+  }).join("");
+  const links = project.links || {};
+  const actions = renderProjectAction("View Project", links.live, true) +
+    renderProjectAction("GitHub", links.github, false);
+  const visuals = project.visuals || {};
+  const desktopDescription = visuals.desktop && visuals.desktop.alt ? visuals.desktop.alt : (project.title + " desktop concept preview");
+  const mobileDescription = visuals.mobile && visuals.mobile.alt ? visuals.mobile.alt : (project.title + " mobile concept preview");
+  const delay = Math.min(index * 70, 210);
+  const showcaseClass = "project-showcase" + (isHandyHome ? " project-showcase--handyhome" : "");
+  const motionAttributes = isHandyHome
+    ? " data-handyhome-motion"
+    : ' data-reveal data-reveal-delay="' + delay + '"';
+  const copyRevealClass = isHandyHome ? " project-showcase-reveal" : "";
+
+  return '<article class="' + showcaseClass + '"' + motionAttributes + ' aria-labelledby="project-' + projectId + '">' +
+    '<div class="project-showcase-copy">' +
+      '<p class="project-showcase-meta' + copyRevealClass + '"><span class="project-showcase-number">' + number + '</span><span class="project-showcase-kicker">' + escapeHtml(project.label || "selected project") + "</span></p>" +
+      '<h3 class="project-showcase-title' + copyRevealClass + '" id="project-' + projectId + '">' + escapeHtml(project.title) + "</h3>" +
+      '<p class="project-showcase-description' + copyRevealClass + '">' + escapeHtml(project.description || "") + "</p>" +
+      '<dl class="project-showcase-details' + copyRevealClass + '">' +
+        '<div class="project-showcase-detail"><dt class="project-showcase-detail-label">Role</dt><dd class="project-showcase-detail-value">' + escapeHtml(project.role || "Project Developer") + "</dd></div>" +
+        (tags.length ? '<div class="project-showcase-detail"><dt class="project-showcase-detail-label">' + tagLabel + '</dt><dd><ul class="project-showcase-tags" aria-label="' + tagLabel + ' for ' + escapeHtml(project.title) + '">' + tagMarkup + "</ul></dd></div>" : "") +
+      "</dl>" +
+      '<ul class="project-showcase-features' + copyRevealClass + '" aria-label="Key features">' + features + "</ul>" +
+      (actions ? '<div class="project-showcase-actions' + copyRevealClass + '">' + actions + "</div>" : "") +
+    "</div>" +
+    '<div class="project-showcase-visual">' +
+      '<div class="device-stage" data-device-tilt' + (isHandyHome ? " data-handyhome-parallax" : "") + '>' +
+        '<div class="device-laptop-motion"><div class="device-laptop-float"><figure class="device-laptop"><div class="device-laptop-camera" aria-hidden="true"></div><div class="device-screen">' +
+          renderDeviceScreen(project, visuals.desktop, "desktop") +
+        '</div><div class="device-laptop-base" aria-hidden="true"><span></span></div>' + renderDeviceCaption(visuals.desktop, desktopDescription) + "</figure></div></div>" +
+        '<div class="device-phone-motion"><div class="device-phone-float"><figure class="device-phone"><div class="device-phone-speaker" aria-hidden="true"></div><div class="device-screen">' +
+          renderDeviceScreen(project, visuals.mobile, "mobile") +
+        '</div>' + renderDeviceCaption(visuals.mobile, mobileDescription) + "</figure></div></div>" +
+      "</div>" +
+    "</div>" +
+  "</article>";
+}
+
+document.getElementById("experience-body").innerHTML = DATA.experience.map(renderProjectShowcase).join("");
 
 const contact = DATA.contact;
 const phoneHref = contact.phone.replace(/[^\d+]/g, "");
@@ -204,7 +272,7 @@ document.getElementById("copy-email").addEventListener("click", copyEmail);
 
 function setupImageTransitions() {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  const images = Array.from(document.querySelectorAll(".portrait, .project-shot img"));
+  const images = Array.from(document.querySelectorAll(".portrait, .device-screen-image"));
   if (!images.length) return;
 
   document.documentElement.classList.add("motion-ready");
@@ -268,6 +336,139 @@ function setupProfileSequence() {
     illustration.addEventListener("load", scheduleOriginal, { once: true });
     illustration.addEventListener("error", useOriginalFallback, { once: true });
   }
+}
+
+function setupProjectDeviceTilt() {
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
+  if (reducedMotion.matches || !finePointer.matches) return;
+
+  const stages = Array.from(document.querySelectorAll("[data-device-tilt]"));
+  stages.forEach(function(stage) {
+    let frameId = 0;
+
+    function resetTilt() {
+      window.cancelAnimationFrame(frameId);
+      stage.classList.remove("is-tilting");
+      stage.style.removeProperty("--device-tilt-x");
+      stage.style.removeProperty("--device-tilt-y");
+      stage.style.removeProperty("--device-lift");
+    }
+
+    function updateTilt(event) {
+      if (event.pointerType && event.pointerType !== "mouse") return;
+      const bounds = stage.getBoundingClientRect();
+      if (!bounds.width || !bounds.height) return;
+
+      const relativeX = Math.max(-1, Math.min(1, ((event.clientX - bounds.left) / bounds.width - .5) * 2));
+      const relativeY = Math.max(-1, Math.min(1, ((event.clientY - bounds.top) / bounds.height - .5) * 2));
+      window.cancelAnimationFrame(frameId);
+      frameId = window.requestAnimationFrame(function() {
+        stage.classList.add("is-tilting");
+        stage.style.setProperty("--device-tilt-x", String(relativeY * -3.2) + "deg");
+        stage.style.setProperty("--device-tilt-y", String(relativeX * 3.2) + "deg");
+        stage.style.setProperty("--device-lift", String(Math.abs(relativeX) + Math.abs(relativeY)) + "px");
+      });
+    }
+
+    stage.addEventListener("pointermove", updateTilt, { passive: true });
+    stage.addEventListener("pointerleave", resetTilt);
+    stage.addEventListener("pointercancel", resetTilt);
+  });
+}
+
+function setupHandyHomeMotion() {
+  const showcases = Array.from(document.querySelectorAll("[data-handyhome-motion]"));
+  if (!showcases.length) return;
+
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  if (reducedMotion.matches || !("IntersectionObserver" in window)) {
+    showcases.forEach(function(showcase) { showcase.classList.add("is-handyhome-visible"); });
+    return;
+  }
+
+  document.documentElement.classList.add("js");
+
+  const activeStages = new Set();
+  const mobileViewport = window.matchMedia("(max-width: 720px)");
+  let frameId = 0;
+  let isTracking = false;
+
+  function updateParallax() {
+    frameId = 0;
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+    const laptopDistance = mobileViewport.matches ? 6 : 15;
+    const phoneDistance = mobileViewport.matches ? 9 : 25;
+
+    activeStages.forEach(function(stage) {
+      const bounds = stage.getBoundingClientRect();
+      const progress = Math.max(0, Math.min(1, (viewportHeight - bounds.top) / (viewportHeight + bounds.height)));
+      const laptop = stage.querySelector(".device-laptop-motion");
+      const phone = stage.querySelector(".device-phone-motion");
+
+      if (laptop) laptop.style.setProperty("--handyhome-laptop-parallax", String(progress * -laptopDistance) + "px");
+      if (phone) phone.style.setProperty("--handyhome-phone-parallax", String(progress * -phoneDistance) + "px");
+    });
+  }
+
+  function queueParallax() {
+    if (!activeStages.size || frameId) return;
+    frameId = window.requestAnimationFrame(updateParallax);
+  }
+
+  function stopTracking() {
+    if (activeStages.size || !isTracking) return;
+    window.removeEventListener("scroll", queueParallax);
+    window.removeEventListener("resize", queueParallax);
+    window.cancelAnimationFrame(frameId);
+    frameId = 0;
+    isTracking = false;
+  }
+
+  function startTracking() {
+    if (!isTracking) {
+      window.addEventListener("scroll", queueParallax, { passive: true });
+      window.addEventListener("resize", queueParallax);
+      isTracking = true;
+    }
+    queueParallax();
+  }
+
+  const revealObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add("is-handyhome-visible");
+      revealObserver.unobserve(entry.target);
+    });
+  }, { threshold: .2 });
+
+  const visibilityObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      const stage = entry.target;
+      const showcase = stage.closest("[data-handyhome-motion]");
+      const laptop = stage.querySelector(".device-laptop-motion");
+      const phone = stage.querySelector(".device-phone-motion");
+
+      if (entry.isIntersecting) {
+        activeStages.add(stage);
+        if (showcase) showcase.classList.add("is-handyhome-in-view");
+        startTracking();
+        return;
+      }
+
+      activeStages.delete(stage);
+      if (showcase) showcase.classList.remove("is-handyhome-in-view");
+      if (laptop) laptop.style.removeProperty("--handyhome-laptop-parallax");
+      if (phone) phone.style.removeProperty("--handyhome-phone-parallax");
+      stopTracking();
+    });
+  }, { threshold: 0 });
+
+  showcases.forEach(function(showcase) {
+    revealObserver.observe(showcase);
+    const stage = showcase.querySelector("[data-handyhome-parallax]");
+    if (stage) visibilityObserver.observe(stage);
+  });
 }
 
 function setupStackLogos() {
@@ -341,6 +542,8 @@ function setupScrollSpy() {
 setupReveals();
 setupImageTransitions();
 setupProfileSequence();
+setupProjectDeviceTilt();
+setupHandyHomeMotion();
 setupStackLogos();
 setupScrollSpy();
 void initializeFirebase();

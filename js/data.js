@@ -71,55 +71,74 @@ export const DATA = {
   ],
   experience: [
     {
-      version: "live web project",
-      title: "HandyHome Batangas",
-      url: "https://handyhomebatangas.com/pages/auth/login",
-      meta: "HandyHome | Home-services booking platform",
-      points: [
-        "A home-services platform that lets customers book services and connect with verified workers.",
-        "Includes user sign-in, worker and booking management, booking-status tracking, and an admin dashboard.",
-        "Visit the live project through the project link."
+      id: "handyhome",
+      label: "live web project",
+      title: "HandyHome",
+      description: "On-demand household services and booking platform.",
+      role: "Full-Stack Developer",
+      technologies: ["React", "Ionic", "Node.js", "Firebase"],
+      focus: [],
+      features: [
+        "Service booking",
+        "Authentication",
+        "Booking-status tracking",
+        "Admin dashboard"
       ],
-      images: [
-        {
+      links: {
+        live: "https://handyhomebatangas.com/pages/auth/login",
+        github: ""
+      },
+      visuals: {
+        desktop: {
           src: "assets/images/projects/handyhome/admin-dashboard.png",
           alt: "HandyHome admin dashboard showing analytics and management options.",
-          label: "Admin dashboard"
+          fit: "contain"
         },
-        {
-          src: "assets/images/projects/handyhome/logo.png",
-          alt: "HandyHome logo featuring a blue house character.",
-          label: "HandyHome identity"
-        },
-        {
+        mobile: {
           src: "assets/images/projects/handyhome/login-screen.png",
           alt: "HandyHome user sign-in screen.",
-          label: "Login experience"
+          fit: "cover"
         }
-      ]
+      },
+      placeholder: {
+        kind: "service",
+        eyebrow: "HandyHome",
+        title: "Book help, simply.",
+        metrics: ["Trusted workers", "Live bookings"]
+      }
     },
     {
-      version: "web application",
+      id: "parkbased",
+      label: "web application",
       title: "ParkBased",
-      url: "",
-      meta: "ParkBased | Parking reservation platform",
-      points: [
-        "A parking-reservation platform designed to help drivers find, reserve, and manage parking spaces with less hassle.",
-        "The landing experience highlights registered and active-user metrics alongside a clear reservation call to action.",
-        "Account registration collects vehicle type and plate-number details to support a more personalized parking experience."
+      description: "A parking-reservation platform designed to help drivers find, reserve, and manage spaces with less hassle.",
+      role: "Web Application Developer",
+      technologies: [],
+      focus: ["Reservations", "Account flow", "Responsive UI"],
+      features: [
+        "Parking-space discovery",
+        "Reservation workflow",
+        "Vehicle details",
+        "Account registration"
       ],
-      images: [
-        {
+      links: {
+        live: "",
+        github: ""
+      },
+      visuals: {
+        desktop: {
           src: "assets/images/projects/parkbased/landing-dashboard.png",
           alt: "ParkBased landing page showing a parking-reservation call to action and user statistics.",
-          label: "Landing dashboard"
+          fit: "contain"
         },
-        {
-          src: "assets/images/projects/parkbased/account-registration.png",
-          alt: "ParkBased account-registration screen with vehicle and plate-number fields.",
-          label: "Account registration"
-        }
-      ]
+        mobile: null
+      },
+      placeholder: {
+        kind: "parking",
+        eyebrow: "ParkBased",
+        title: "Your space is ready.",
+        metrics: ["B-12", "09:30 AM"]
+      }
     }
   ],
   contact: {
