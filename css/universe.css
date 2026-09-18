@@ -1,0 +1,118 @@
+/* Static star layers and transform-only motion keep the universe lightweight. */
+#skills > div{ min-width: 0; }
+.universe{
+  --space-accent: #78a2ff;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid #28374f;
+  border-radius: 26px;
+  color: #edf3ff;
+  background: radial-gradient(ellipse at 50% 42%, #17294a 0%, #0c1628 38%, #080e19 75%);
+  box-shadow: 0 24px 65px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.universe::before{
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  opacity: .55;
+  pointer-events: none;
+  background-image: radial-gradient(circle, #b9d4ff 1px, transparent 1.5px), radial-gradient(circle, #7a99c9 .7px, transparent 1.2px), radial-gradient(circle, #ffffff .8px, transparent 1.3px);
+  background-size: 113px 127px, 67px 83px, 179px 151px;
+  background-position: 17px 29px, 43px 7px, 90px 65px;
+}
+.universe-toolbar{ display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 22px 24px 0; }
+.universe-eyebrow{ color: #adc3e5; font: 400 .6rem/1.6 var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+.universe button:focus-visible{ outline: 2px solid #b4d4ff; outline-offset: 4px; }
+.universe-scene{ position: relative; width: calc(100% - 24px); max-width: 680px; aspect-ratio: 1; margin: 8px auto; container-type: inline-size; }
+.universe-sun{
+  position: absolute;
+  z-index: 2;
+  top: 50%; left: 50%;
+  width: 19%; aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border: 2px solid #89b4ff;
+  border-radius: 50%;
+  background: #17294a;
+  box-shadow: 0 0 0 8px #78a2ff0a, 0 0 35px #508aff50, 0 0 80px #2868ea25;
+}
+.universe-sun img{ display: block; width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
+.universe-sun span{ position: absolute; bottom: -9px; left: 50%; transform: translateX(-50%); padding: 4px 10px; border: 1px solid #49648c; border-radius: 20px; background: #101f36; color: #e6eeff; font: 500 clamp(.55rem, 1.8cqi, .7rem)/1 var(--mono); }
+.universe-ring{
+  position: absolute;
+  top: 50%; left: 50%;
+  width: var(--orbit-size); height: var(--orbit-size);
+  margin: 0; padding: 0;
+  transform: translate(-50%, -50%);
+  border: 1px solid #82abed2b;
+  border-radius: 50%;
+  list-style: none;
+  pointer-events: none;
+}
+.universe-ring:nth-of-type(2){ border-color: #82abed20; }
+.universe-ring:nth-of-type(3){ border-color: #82abed18; }
+.universe-orbit{ position: absolute; inset: -1px; transform: rotate(var(--angle)); animation: universe-orbit var(--orbit-duration) linear infinite; }
+.universe-position{ position: absolute; left: 50%; top: 0; transform: translate(-50%, -50%); }
+.universe-counter{ transform: rotate(calc(0deg - var(--angle))); animation: universe-counter var(--orbit-duration) linear infinite; }
+.universe-planet{
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: clamp(32px, 8cqi, 54px); height: clamp(32px, 8cqi, 54px);
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--planet-color) 50%, #263654);
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 20%, #263b59, #0d182a 80%);
+  color: var(--planet-color);
+  box-shadow: 0 4px 12px #0008, 0 0 16px color-mix(in srgb, var(--planet-color) 15%, transparent);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+.universe-planet img{ position: absolute; width: 52%; height: 52%; object-fit: contain; opacity: 0; }
+.universe-fallback{ font: 500 clamp(.5rem, 1.7cqi, .7rem)/1 var(--mono); }
+.universe-planet.has-image img{ opacity: 1; }
+.universe-planet.has-image .universe-fallback{ opacity: 0; }
+.universe-tooltip{
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 7px); left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 9px;
+  border: 1px solid #49648c;
+  border-radius: 7px;
+  background: #0c1729;
+  color: #ffffff;
+  font: 400 .65rem/1.3 var(--mono);
+  white-space: nowrap;
+  opacity: 0; visibility: hidden;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+.universe-planet:is(:hover, :focus-visible, [aria-pressed="true"]){ border-color: var(--planet-color); box-shadow: 0 0 25px color-mix(in srgb, var(--planet-color) 35%, transparent); }
+.universe-planet:is(:hover, :focus-visible, [aria-pressed="true"]) .universe-tooltip{ opacity: 1; visibility: visible; }
+.universe-orbit:has(.universe-planet:is(:hover, :focus-visible, [aria-pressed="true"])), .universe-ring:has(.universe-planet:is(:hover, :focus-visible, [aria-pressed="true"])){ z-index: 4; }
+.universe.is-offscreen :is(.universe-orbit, .universe-counter){ animation-play-state: paused; }
+.universe-orbit:has(.universe-planet:is(:focus-visible, [aria-pressed="true"])),
+.universe-orbit:has(.universe-planet:is(:focus-visible, [aria-pressed="true"])) .universe-counter{ animation-play-state: paused; }
+@media (hover: hover){
+  .universe-orbit:has(.universe-planet:hover),
+  .universe-orbit:has(.universe-planet:hover) .universe-counter{ animation-play-state: paused; }
+}
+.universe-legend{ display: flex; flex-wrap: wrap; justify-content: center; gap: 9px 16px; margin: 18px 22px 25px; padding: 18px 0 0; border-top: 1px solid #25344b; list-style: none; }
+.universe-legend li{ display: flex; align-items: center; gap: 6px; color: #c7d7ef; font: 400 .65rem/1.6 var(--mono); }
+.universe-legend li::before{ content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--planet-color); }
+@keyframes universe-orbit{ to{ transform: rotate(calc(var(--angle) + 360deg)); } }
+@keyframes universe-counter{ to{ transform: rotate(calc(0deg - var(--angle) - 360deg)); } }
+@media (max-width: 480px){
+  .universe{ border-radius: 18px; }
+  .universe-toolbar{ padding: 16px 14px 0; gap: 8px; }
+  .universe-eyebrow{ max-width: 120px; font-size: .53rem; }
+  .universe-tooltip{ font-size: .55rem; padding: 5px 6px; }
+  .universe-legend{ gap: 8px 12px; }
+}
+@media (prefers-reduced-motion: reduce){
+  .universe-orbit, .universe-counter{ animation: none !important; }
+  .universe *{ transition: none !important; }
+}

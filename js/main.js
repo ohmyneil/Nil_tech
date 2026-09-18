@@ -1,4 +1,5 @@
 import { DATA } from "./data.js";
+import { mountUniverse } from "./universe.js";
 
 // Render portfolio content and handle page interactions.
 const PHOTOREAL_LAPTOP_FRAME = "assets/images/projects/shared/laptop-frame.png";
@@ -50,24 +51,7 @@ document.getElementById("about-body").innerHTML = DATA.about.map(function(paragr
   return "<p>" + escapeHtml(paragraph) + "</p>";
 }).join("");
 
-document.getElementById("skills-body").innerHTML = DATA.skills.map(function(group, index) {
-  const items = group.items.length
-    ? '<ul class="stack-items">' + group.items.map(function(item, itemIndex) {
-      const color = /^#[0-9a-f]{6}$/i.test(item.color || "") ? item.color : "#2868ea";
-      const iconUrl = typeof item.icon === "string" && item.icon.startsWith("https://cdn.simpleicons.org/") ? item.icon : "";
-      const image = iconUrl
-        ? '<img class="stack-logo-image" src="' + escapeHtml(iconUrl) + '" alt="" loading="lazy" decoding="async">'
-        : "";
-      return '<li class="stack-item" style="--stack-index:' + itemIndex + ';--stack-color:' + escapeHtml(color) + '">' +
-        '<span class="stack-logo" aria-hidden="true"><span class="stack-logo-fallback">' + escapeHtml(item.logo) + '</span>' + image + '</span>' +
-        '<span class="stack-item-name">' + escapeHtml(item.name) + '</span></li>';
-    }).join("") + "</ul>"
-    : '<p class="stack-pending">' + escapeHtml(group.note || "No technologies listed yet") + "</p>";
-  const delay = Math.min(index * 80, 160);
-  return '<article class="stack-row" data-reveal data-reveal-delay="' + delay + '">' +
-    '<div class="stack-group-heading"><span class="stack-group-number" aria-hidden="true">' + String(index + 1).padStart(2, "0") + '</span>' +
-    '<h3>' + escapeHtml(group.group) + '</h3><span class="stack-group-count">' + group.items.length + ' tools</span></div>' + items + "</article>";
-}).join("");
+mountUniverse(document.getElementById("skills-body"), DATA);
 
 document.getElementById("projects-body").innerHTML = DATA.projects.map(function(project, index) {
   const tags = project.tags.map(function(tag) {
@@ -506,19 +490,6 @@ function setupHandyHomeMotion() {
   });
 }
 
-function setupStackLogos() {
-  const images = Array.from(document.querySelectorAll(".stack-logo-image"));
-  images.forEach(function(image) {
-    const logo = image.closest(".stack-logo");
-    const showLogo = function() { logo.classList.add("has-image"); };
-    if (image.complete && image.naturalWidth > 0) {
-      window.requestAnimationFrame(showLogo);
-      return;
-    }
-    image.addEventListener("load", showLogo, { once: true });
-  });
-}
-
 function setupReveals() {
   const targets = Array.from(document.querySelectorAll("[data-reveal]"));
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -625,7 +596,7 @@ setupImageTransitions();
 setupProfileSequence();
 setupProjectDeviceTilt();
 setupHandyHomeMotion();
-setupStackLogos();
+
 setupScrollSpy();
 setupAmbientMotion();
 

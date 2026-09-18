@@ -12,6 +12,16 @@ export const DATA = {
     "I’m passionate about learning, innovation, and continuous improvement, and I enjoy solving real-world challenges through technology. Whether working independently or with a team, I bring a results-driven mindset, attention to detail, and a commitment to delivering quality work.",
     "Let’s build something meaningful together."
   ],
+  universe: [
+    { name: "React", short: "R", icon: "react", color: "#61DAFB" },
+    { name: "HTML", short: "</>", icon: "html5", color: "#E34F26" },
+    { name: "CSS", short: "CSS", icon: "css", color: "#609EFF" },
+    { name: "JavaScript", short: "JS", icon: "javascript", color: "#F7DF1E" },
+    { name: "Node.js", short: "N", icon: "nodedotjs", color: "#70C660" },
+    { name: "Firebase", short: "FB", icon: "firebase", color: "#FFCA28" },
+    { name: "MySQL", short: "MY", icon: "mysql", color: "#72B4D8" },
+    { name: "Git", short: "G", icon: "git", color: "#F37058" }
+  ],
   skills: [
     {
       group: "frontend development",
