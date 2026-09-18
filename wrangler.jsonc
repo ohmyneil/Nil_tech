@@ -2,6 +2,12 @@
   "name": "nil-tech",
   "compatibility_date": "2026-08-15",
   "assets": {
-    "directory": "./dist"
+    "directory": ".",
+    "include": [
+      "index.html",
+      "css/**",
+      "js/**",
+      "assets/**"
+    ]
   }
 }

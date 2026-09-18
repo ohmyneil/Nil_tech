@@ -16,7 +16,6 @@ Then open [http://127.0.0.1:8080/](http://127.0.0.1:8080/).
 - `css/styles.css` - visual design, responsive rules, and motion
 - `js/data.js` - portfolio content
 - `js/main.js` - rendering and interactions
-- `js/firebase.js` - Firebase app and production Analytics setup
 - `assets/images/` - profile and project images
 - `assets/documents/` - downloadable resume
 - `server.js` - local development server
@@ -27,16 +26,11 @@ The portfolio contact form submits directly to Formspree at `https://formspree.i
 
 The existing server SMTP route remains available as an optional self-hosted alternative, but it is not used by the public form.
 
-## Firebase Analytics
-
-Firebase is initialized from `js/firebase.js` using the registered web-app configuration. Google Analytics starts only on supported HTTPS deployments, so local development does not add test traffic to the production property. Firebase Analytics is separate from the Formspree contact-delivery flow; Firebase Authentication, Firestore, or Functions require their own service-specific setup and Security Rules.
-
 ## Cloudflare static deployment
 
-The static-site deployment configuration is in `wrangler.jsonc`. Build the assets before deploying:
+The static-site deployment configuration is in `wrangler.jsonc`. It deploys only the source site assets (`index.html`, `css/`, `js/`, and `assets/`), so deployment does not depend on the ignored local `dist/` folder:
 
 ```powershell
-npm run build
 npx wrangler deploy
 ```
 

@@ -13,6 +13,8 @@
     --mono: "DM Mono", ui-monospace, monospace;
     --max: 1120px;
     --ease: cubic-bezier(.22, 1, .36, 1);
+    --pointer-x: 72%;
+    --pointer-y: 38%;
   }
   body.dark{
     --page: #0c0d0c;
@@ -35,6 +37,7 @@
     font-family: var(--sans);
     -webkit-font-smoothing: antialiased;
     transition: background 220ms ease, color 220ms ease;
+    overflow-x: hidden;
   }
   ::selection{ background: var(--accent); color: var(--accent-ink); }
   a{ color: inherit; text-decoration: none; }
@@ -66,6 +69,26 @@
     transition: transform 160ms ease;
   }
   .skip-link:focus{ transform: translateY(0); }
+  .page-progress{
+    position: fixed;
+    z-index: 40;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 2px;
+    pointer-events: none;
+    background: color-mix(in srgb, var(--line) 72%, transparent);
+  }
+  .page-progress span{
+    display: block;
+    width: 100%;
+    height: 100%;
+    transform: scaleX(var(--scroll-progress, 0));
+    transform-origin: left center;
+    background: var(--accent);
+    box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 58%, transparent);
+    transition: transform 80ms linear, background-color 220ms var(--ease);
+  }
 
   /* Header */
   .site-header{
@@ -158,6 +181,8 @@
 
   /* Hero */
   .hero{
+    position: relative;
+    isolation: isolate;
     display: grid;
     grid-template-columns: 245px minmax(0, 1fr);
     gap: clamp(32px, 7vw, 94px);
@@ -165,6 +190,35 @@
     min-height: 490px;
     padding: clamp(56px, 9vw, 118px) 0;
   }
+  .hero::before,
+  .hero::after{
+    content: "";
+    position: absolute;
+    z-index: -1;
+    pointer-events: none;
+  }
+  .hero::before{
+    inset: 8% -12% 4% 18%;
+    background-image: linear-gradient(color-mix(in srgb, var(--accent) 11%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--accent) 11%, transparent) 1px, transparent 1px);
+    background-position: center;
+    background-size: 42px 42px;
+    mask-image: radial-gradient(ellipse 63% 74% at 62% 45%, #000 12%, transparent 76%);
+    opacity: .78;
+    animation: hero-grid-drift 18s linear infinite;
+  }
+  .hero::after{
+    top: 2%;
+    right: -8%;
+    width: min(56vw, 650px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle at var(--pointer-x) var(--pointer-y), color-mix(in srgb, var(--accent) 17%, transparent) 0, color-mix(in srgb, var(--accent) 8%, transparent) 29%, transparent 68%);
+    filter: blur(5px);
+    opacity: .9;
+    transition: background-position 420ms var(--ease);
+    animation: hero-aura-breathe 7s ease-in-out infinite;
+  }
+  .hero > *{ position: relative; z-index: 1; }
   .portrait-wrap{
     position: relative;
     width: 100%;
@@ -172,8 +226,20 @@
     border-top: 1px solid var(--line-strong);
     border-left: 1px solid var(--line-strong);
   }
+  .portrait-wrap::before{
+    content: "";
+    position: absolute;
+    z-index: 0;
+    inset: -7px 7px 7px -7px;
+    border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent);
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+    opacity: .8;
+    animation: portrait-orbit 9s linear infinite;
+  }
   .portrait-display{
     position: relative;
+    z-index: 1;
     display: block;
     width: 100%;
     padding: 0;
@@ -223,6 +289,7 @@
     font: 500 .55rem/1 var(--mono);
     letter-spacing: .06em;
     pointer-events: none;
+    z-index: 2;
   }
   .portrait{
     position: absolute;
@@ -688,6 +755,39 @@
     border-top: 0;
     border-radius: 0 0 5px 5px;
     transform: translateX(-50%);
+  }
+  .device-laptop--photoreal{
+    aspect-ratio: 3 / 2;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: 0 calc(26px + var(--device-lift)) 44px color-mix(in srgb, var(--ink) 16%, transparent);
+  }
+  .device-laptop-shell{
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .device-laptop-photo-screen{
+    position: absolute;
+    z-index: 1;
+    top: 12.1%;
+    right: 20.7%;
+    bottom: 35.25%;
+    left: 20.7%;
+    overflow: hidden;
+    border-radius: 2px;
+    background: #ffffff;
+  }
+  .device-laptop--photoreal .device-screen{
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    border: 0;
+    border-radius: 0;
   }
   .device-phone{
     width: 100%;
@@ -1250,6 +1350,18 @@
   @keyframes handyhome-phone-float{
     0%, 100%{ transform: translate3d(0, 0, 0) rotateZ(0); }
     50%{ transform: translate3d(0, var(--handyhome-phone-float-y), 0) rotateZ(var(--handyhome-phone-float-rotation)); }
+  }
+  @keyframes hero-grid-drift{
+    from{ background-position: 0 0, 0 0; }
+    to{ background-position: 42px 42px, 42px 42px; }
+  }
+  @keyframes hero-aura-breathe{
+    0%, 100%{ transform: scale(.96); opacity: .68; }
+    50%{ transform: scale(1.045); opacity: 1; }
+  }
+  @keyframes portrait-orbit{
+    0%, 100%{ transform: rotate(0deg); opacity: .46; }
+    50%{ transform: rotate(180deg); opacity: .9; }
   }
   .js [data-reveal]{
     opacity: 0;

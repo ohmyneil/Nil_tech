@@ -34,8 +34,7 @@ export const DATA = {
       group: "database",
       items: [
         { name: "MySQL", logo: "MY", icon: "https://cdn.simpleicons.org/mysql/4479A1", color: "#4479A1" },
-        { name: "MongoDB", logo: "MG", icon: "https://cdn.simpleicons.org/mongodb/47A248", color: "#47A248" },
-        { name: "Firebase", logo: "FB", icon: "https://cdn.simpleicons.org/firebase/DD2C00", color: "#DD2C00" }
+        { name: "MongoDB", logo: "MG", icon: "https://cdn.simpleicons.org/mongodb/47A248", color: "#47A248" }
       ]
     }
   ],
@@ -91,14 +90,13 @@ export const DATA = {
       visuals: {
         desktop: {
           src: "assets/images/projects/handyhome/admin-dashboard.png",
+          artworkSrc: "assets/images/projects/handyhome/laptop-artwork.png",
+          artworkAlt: "Laptop displaying the HandyHome admin dashboard beside a phone showing service booking and location selection.",
           alt: "HandyHome admin dashboard showing analytics and management options.",
-          fit: "contain"
+          fit: "contain",
+          frame: "artwork"
         },
-        mobile: {
-          src: "assets/images/projects/handyhome/login-screen.png",
-          alt: "HandyHome user sign-in screen.",
-          fit: "cover"
-        }
+        mobile: null
       },
       placeholder: {
         kind: "service",
@@ -128,8 +126,11 @@ export const DATA = {
       visuals: {
         desktop: {
           src: "assets/images/projects/parkbased/landing-dashboard.png",
+          artworkSrc: "assets/images/projects/parkbased/laptop-artwork.png",
+          artworkAlt: "Silver laptop displaying the ParkBased parking reservation landing page with blue illuminated graphics.",
           alt: "ParkBased landing page showing a parking-reservation call to action and user statistics.",
-          fit: "contain"
+          fit: "contain",
+          frame: "artwork"
         },
         mobile: null
       },

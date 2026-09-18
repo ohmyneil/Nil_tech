@@ -1,7 +1,8 @@
 import { DATA } from "./data.js";
-import { initializeFirebase } from "./firebase.js";
 
 // Render portfolio content and handle page interactions.
+const PHOTOREAL_LAPTOP_FRAME = "assets/images/projects/shared/laptop-frame.png";
+const LAPTOP_ARTWORK = "assets/images/projects/shared/neil-laptop.png";
 
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, function(character) {
@@ -117,6 +118,49 @@ function renderDeviceCaption(visual, description) {
   return '<figcaption class="visually-hidden">' + escapeHtml(description) + "</figcaption>";
 }
 
+function renderLaptopDevice(project, visual, description) {
+  if (visual && visual.frame === "artwork") {
+    return '<figure class="device-laptop device-laptop--photoreal">' +
+      '<img class="device-laptop-shell" src="' + escapeHtml(visual.artworkSrc || LAPTOP_ARTWORK) + '" alt="' + escapeHtml(visual.artworkAlt || "Silver laptop displaying Neil's portfolio with blue illuminated graphics.") + '" width="1536" height="1024" loading="lazy" decoding="async">' +
+    "</figure>";
+  }
+
+  if (visual && visual.frame === "photoreal") {
+    return '<figure class="device-laptop device-laptop--photoreal">' +
+      '<img class="device-laptop-shell" src="' + PHOTOREAL_LAPTOP_FRAME + '" alt="" aria-hidden="true" loading="lazy" decoding="async">' +
+      '<div class="device-laptop-photo-screen">' + renderDeviceScreen(project, visual, "desktop") + "</div>" +
+      renderDeviceCaption(visual, description) +
+    "</figure>";
+  }
+
+  return '<figure class="device-laptop"><div class="device-laptop-camera" aria-hidden="true"></div><div class="device-screen">' +
+    renderDeviceScreen(project, visual, "desktop") +
+    '</div><div class="device-laptop-base" aria-hidden="true"><span></span></div>' + renderDeviceCaption(visual, description) + "</figure>";
+}
+
+function renderPhoneDevice(project, visual, description) {
+  return '<figure class="device-phone"><div class="device-phone-speaker" aria-hidden="true"></div><div class="device-screen">' +
+    renderDeviceScreen(project, visual, "mobile") +
+    "</div>" + renderDeviceCaption(visual, description) + "</figure>";
+}
+
+function renderDeviceMotion(device, markup) {
+  return '<div class="device-' + device + '-motion"><div class="device-' + device + '-float">' + markup + "</div></div>";
+}
+
+function renderProjectDevices(project, visuals, isHandyHome) {
+  const desktopVisual = visuals.desktop || null;
+  const mobileVisual = visuals.mobile || null;
+  const desktopDescription = desktopVisual && desktopVisual.alt ? desktopVisual.alt : (project.title + " desktop concept preview");
+  const mobileDescription = mobileVisual && mobileVisual.alt ? mobileVisual.alt : (project.title + " mobile concept preview");
+  const parallaxAttribute = isHandyHome ? " data-handyhome-parallax" : "";
+
+  return '<div class="project-showcase-visual"><div class="device-stage" data-device-tilt' + parallaxAttribute + ">" +
+    renderDeviceMotion("laptop", renderLaptopDevice(project, desktopVisual, desktopDescription)) +
+    (visuals.mobile === null ? "" : renderDeviceMotion("phone", renderPhoneDevice(project, mobileVisual, mobileDescription))) +
+  "</div></div>";
+}
+
 function renderProjectAction(label, url, isPrimary) {
   if (!url || url === "#") return "";
   return '<a class="showcase-action' + (isPrimary ? " showcase-action-primary" : "") + '" href="' + escapeHtml(url) + '" target="_blank" rel="noopener">' +
@@ -141,8 +185,6 @@ function renderProjectShowcase(project, index) {
   const actions = renderProjectAction("View Project", links.live, true) +
     renderProjectAction("GitHub", links.github, false);
   const visuals = project.visuals || {};
-  const desktopDescription = visuals.desktop && visuals.desktop.alt ? visuals.desktop.alt : (project.title + " desktop concept preview");
-  const mobileDescription = visuals.mobile && visuals.mobile.alt ? visuals.mobile.alt : (project.title + " mobile concept preview");
   const delay = Math.min(index * 70, 210);
   const showcaseClass = "project-showcase" + (isHandyHome ? " project-showcase--handyhome" : "");
   const motionAttributes = isHandyHome
@@ -162,16 +204,7 @@ function renderProjectShowcase(project, index) {
       '<ul class="project-showcase-features' + copyRevealClass + '" aria-label="Key features">' + features + "</ul>" +
       (actions ? '<div class="project-showcase-actions' + copyRevealClass + '">' + actions + "</div>" : "") +
     "</div>" +
-    '<div class="project-showcase-visual">' +
-      '<div class="device-stage" data-device-tilt' + (isHandyHome ? " data-handyhome-parallax" : "") + '>' +
-        '<div class="device-laptop-motion"><div class="device-laptop-float"><figure class="device-laptop"><div class="device-laptop-camera" aria-hidden="true"></div><div class="device-screen">' +
-          renderDeviceScreen(project, visuals.desktop, "desktop") +
-        '</div><div class="device-laptop-base" aria-hidden="true"><span></span></div>' + renderDeviceCaption(visuals.desktop, desktopDescription) + "</figure></div></div>" +
-        '<div class="device-phone-motion"><div class="device-phone-float"><figure class="device-phone"><div class="device-phone-speaker" aria-hidden="true"></div><div class="device-screen">' +
-          renderDeviceScreen(project, visuals.mobile, "mobile") +
-        '</div>' + renderDeviceCaption(visuals.mobile, mobileDescription) + "</figure></div></div>" +
-      "</div>" +
-    "</div>" +
+    renderProjectDevices(project, visuals, isHandyHome) +
   "</article>";
 }
 
@@ -539,6 +572,52 @@ function setupScrollSpy() {
   sections.forEach(function(section) { observer.observe(section); });
 }
 
+function setupAmbientMotion() {
+  const hero = document.querySelector(".hero");
+  const progress = document.querySelector(".page-progress");
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  if (progress) {
+    let frameId = 0;
+    const updateProgress = function() {
+      frameId = 0;
+      const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const position = scrollableHeight > 0 ? window.scrollY / scrollableHeight : 0;
+      progress.style.setProperty("--scroll-progress", String(Math.max(0, Math.min(1, position))));
+    };
+    const queueProgress = function() {
+      if (!frameId) frameId = window.requestAnimationFrame(updateProgress);
+    };
+    updateProgress();
+    window.addEventListener("scroll", queueProgress, { passive: true });
+    window.addEventListener("resize", queueProgress);
+  }
+
+  if (!hero || reducedMotion.matches || !window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+
+  let frameId = 0;
+  let pointerX = 72;
+  let pointerY = 38;
+  const paintPointer = function() {
+    frameId = 0;
+    hero.style.setProperty("--pointer-x", String(pointerX) + "%");
+    hero.style.setProperty("--pointer-y", String(pointerY) + "%");
+  };
+
+  hero.addEventListener("pointermove", function(event) {
+    const bounds = hero.getBoundingClientRect();
+    pointerX = Math.max(0, Math.min(100, (event.clientX - bounds.left) / bounds.width * 100));
+    pointerY = Math.max(0, Math.min(100, (event.clientY - bounds.top) / bounds.height * 100));
+    if (!frameId) frameId = window.requestAnimationFrame(paintPointer);
+  }, { passive: true });
+
+  hero.addEventListener("pointerleave", function() {
+    pointerX = 72;
+    pointerY = 38;
+    if (!frameId) frameId = window.requestAnimationFrame(paintPointer);
+  });
+}
+
 setupReveals();
 setupImageTransitions();
 setupProfileSequence();
@@ -546,7 +625,7 @@ setupProjectDeviceTilt();
 setupHandyHomeMotion();
 setupStackLogos();
 setupScrollSpy();
-void initializeFirebase();
+setupAmbientMotion();
 
 const themeToggle = document.getElementById("theme-toggle");
 themeToggle.addEventListener("click", function() {
