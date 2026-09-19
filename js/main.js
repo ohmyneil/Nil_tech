@@ -35,6 +35,7 @@ document.getElementById("hero-name").innerHTML =
   "<span>" + escapeHtml(nameParts.slice(splitAt).join(" ")) + "</span>";
 document.getElementById("hero-tagline").textContent = DATA.tagline;
 document.getElementById("about-role").textContent = DATA.role;
+document.getElementById("about-location").textContent = DATA.contact.location;
 
 const profileOriginal = document.getElementById("profile-original");
 const profileIllustration = document.getElementById("profile-illustration");
