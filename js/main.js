@@ -54,17 +54,33 @@ document.getElementById("about-body").innerHTML = DATA.about.map(function(paragr
 
 mountUniverse(document.getElementById("skills-body"), DATA);
 
-document.getElementById("projects-body").innerHTML = DATA.projects.map(function(project, index) {
+function renderCredential(project, index, isEducation) {
   const tags = project.tags.map(function(tag) {
     return "<span>" + escapeHtml(tag) + "</span>";
   }).join("");
   const delay = Math.min(index * 65, 195);
-  return '<article class="project" data-reveal data-reveal-delay="' + delay + '">' +
-    '<span class="project-number">' + String(index + 1).padStart(2, "0") + "</span>" +
-    "<div><h3><a href=\"" + escapeHtml(project.url || "#") + "\"" + linkAttributes(project.url) + ">" + escapeHtml(project.name) + "</a></h3>" +
-    '<p class="project-desc">' + escapeHtml(project.desc) + "</p></div>" +
-    '<div class="project-tags">' + tags + "</div>" +
-    '<span class="project-arrow" aria-hidden="true">↗</span></article>';
+  const title = project.url && project.url !== "#"
+    ? '<a href="' + escapeHtml(project.url) + '"' + linkAttributes(project.url) + '>' + escapeHtml(project.name) + ' <span aria-hidden="true">&nearr;</span></a>'
+    : escapeHtml(project.name);
+  const metadata = isEducation ? project.stat.replace(/^education\s*\/\s*/i, "") : project.stat.replace(/\s*\/\s*/g, " · ");
+  return '<article class="credential-entry' + (isEducation ? ' credential-entry--education' : ' credential-entry--certificate') + '" data-reveal data-reveal-delay="' + delay + '">' +
+    '<p class="credential-meta">' + escapeHtml(metadata) + '</p>' +
+    '<h4>' + title + '</h4>' +
+    '<p class="credential-description">' + escapeHtml(project.desc) + '</p>' +
+    '<div class="credential-tags">' + tags + '</div></article>';
+}
+
+document.getElementById("projects-body").innerHTML = [
+  { title: "Academic background", education: true, icon: '<path d="m3 9 9-5 9 5-9 5-9-5Z"/><path d="M7 11.2V17c3 2 7 2 10 0v-5.8M21 9v7"/>' },
+  { title: "Credentials & learning", education: false, icon: '<circle cx="12" cy="9" r="5"/><path d="m8.5 13-1 7 4.5-2 4.5 2-1-7"/>' }
+].map(function(group) {
+  const entries = DATA.projects.filter(function(project) {
+    return /^education\s*\//i.test(project.stat) === group.education;
+  });
+  return '<div class="credential-group"><h3 class="credential-group-title" data-reveal>' +
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + group.icon + '</svg>' +
+    group.title + '</h3><div class="' + (group.education ? 'education-timeline' : 'credential-cards') + '">' +
+    entries.map(function(project, index) { return renderCredential(project, index, group.education); }).join("") + '</div></div>';
 }).join("");
 
 function renderProjectPlaceholder(project, deviceType) {
