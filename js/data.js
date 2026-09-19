@@ -20,7 +20,9 @@ export const DATA = {
     { name: "Node.js", short: "N", icon: "nodedotjs", color: "#70C660" },
     { name: "Firebase", short: "FB", icon: "firebase", color: "#FFCA28" },
     { name: "MySQL", short: "MY", icon: "mysql", color: "#72B4D8" },
-    { name: "Git", short: "G", icon: "git", color: "#F37058" }
+    { name: "Git", short: "G", icon: "git", color: "#F37058" },
+    { name: "Figma", short: "Fi", icon: "figma", color: "#A78BFA" },
+    { name: "Canva", short: "Ca", icon: "canva", color: "#00C4CC" }
   ],
   skills: [
     {

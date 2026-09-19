@@ -1235,6 +1235,41 @@
     .footer-signature:hover::before{ transform: rotate(45deg) scale(1.12); box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 14%, transparent); }
   }
 
+  /* Dark theme atmosphere: decorative layers stay behind the content. */
+  body.dark .hero::after{
+    background: radial-gradient(ellipse at 30% 35%, rgba(120, 162, 255, .23), transparent 58%),
+      radial-gradient(ellipse at 72% 62%, rgba(153, 112, 255, .18), transparent 58%);
+  }
+  @media (prefers-reduced-motion: no-preference){
+    body.dark .hero::after{ animation: dark-aurora 12s ease-in-out infinite alternate; }
+    body.dark .hero h1 span{
+      background: linear-gradient(110deg, #78a2ff 20%, #c5b6ff 40%, #d8edff 50%, #78a2ff 70%);
+      background-size: 250% 100%;
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      animation: dark-title-shimmer 8s ease-in-out infinite;
+    }
+    body.dark .portrait-stage{ animation: dark-portrait-glow 1100ms var(--ease); }
+    body.dark .eyebrow::before{ animation: dark-status-pulse 3s ease-out infinite; }
+  }
+  @keyframes dark-aurora{
+    from{ transform: translate3d(-3%, -2%, 0) scale(.94) rotate(-8deg); opacity: .65; }
+    to{ transform: translate3d(3%, 3%, 0) scale(1.08) rotate(8deg); opacity: 1; }
+  }
+  @keyframes dark-title-shimmer{
+    0%, 15%, 100%{ background-position: 100% 50%; }
+    55%, 70%{ background-position: 0% 50%; }
+  }
+  @keyframes dark-portrait-glow{
+    0%, 100%{ box-shadow: 0 0 0 rgba(120, 162, 255, 0); }
+    40%{ box-shadow: 0 0 42px rgba(120, 162, 255, .3); }
+  }
+  @keyframes dark-status-pulse{
+    0%{ box-shadow: 0 0 0 0 rgba(120, 162, 255, .38); }
+    75%, 100%{ box-shadow: 0 0 0 8px rgba(120, 162, 255, 0); }
+  }
+
   /* Motion */
   @keyframes theme-swap{
     0%{ transform: rotate(0deg) scale(1); }

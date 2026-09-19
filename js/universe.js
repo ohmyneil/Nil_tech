@@ -3,8 +3,8 @@ export function mountUniverse(container, data) {
   const escape = value => String(value).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const rings = [
     { size: 36, speed: 36, names: ["React", "HTML", "CSS"] },
-    { size: 61, speed: 52, names: ["JavaScript", "Node.js"] },
-    { size: 86, speed: 72, names: ["Firebase", "MySQL", "Git"] }
+    { size: 61, speed: 52, names: ["JavaScript", "Node.js", "Figma"] },
+    { size: 86, speed: 72, names: ["Firebase", "MySQL", "Git", "Canva"] }
   ];
   const technologies = data.universe;
   container.innerHTML = '<div class="universe" role="group" aria-label="Tech Stack Universe">' +
