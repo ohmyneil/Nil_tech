@@ -618,7 +618,9 @@ setupScrollSpy();
 setupAmbientMotion();
 
 const themeToggle = document.getElementById("theme-toggle");
-themeToggle.addEventListener("click", function() {
+let themeTransitionRunning = false;
+
+function applyTheme() {
   const isDark = document.body.classList.toggle("dark");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (!reducedMotion) {
@@ -629,6 +631,47 @@ themeToggle.addEventListener("click", function() {
   themeToggle.textContent = isDark ? "☼" : "◐";
   themeToggle.setAttribute("aria-label", isDark ? "Switch to light theme" : "Switch to dark theme");
   themeToggle.setAttribute("aria-pressed", String(isDark));
+}
+
+themeToggle.addEventListener("click", async function() {
+  if (themeTransitionRunning) return;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reducedMotion || !document.startViewTransition) {
+    applyTheme();
+    return;
+  }
+
+  const root = document.documentElement;
+  const bounds = themeToggle.getBoundingClientRect();
+  const x = bounds.left + bounds.width / 2;
+  const y = bounds.top + bounds.height / 2;
+  const radius = Math.hypot(
+    Math.max(x, window.innerWidth - x),
+    Math.max(y, window.innerHeight - y)
+  );
+  root.style.setProperty("--theme-reveal-x", `${x}px`);
+  root.style.setProperty("--theme-reveal-y", `${y}px`);
+  root.style.setProperty("--theme-reveal-radius", `${Math.ceil(radius)}px`);
+  root.classList.add("theme-transition");
+  themeTransitionRunning = true;
+  let applied = false;
+  try {
+    const transition = document.startViewTransition(() => {
+      applyTheme();
+      applied = true;
+    });
+    // A hidden tab or unavailable snapshot can skip the visual transition.
+    transition.ready.catch(() => {});
+    await transition.finished;
+  } catch {
+    if (!applied) applyTheme();
+  } finally {
+    root.classList.remove("theme-transition");
+    root.style.removeProperty("--theme-reveal-x");
+    root.style.removeProperty("--theme-reveal-y");
+    root.style.removeProperty("--theme-reveal-radius");
+    themeTransitionRunning = false;
+  }
 });
 themeToggle.addEventListener("animationend", function(event) {
   if (event.animationName === "theme-swap") themeToggle.classList.remove("is-switching");

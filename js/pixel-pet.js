@@ -62,13 +62,16 @@ export function mountPixelPet({ projects = '#experience', contact = '#contact', 
       <a data-action="contact">Contact Me <span aria-hidden="true">↗</span></a>
       <button type="button" data-action="mute" aria-pressed="false">Mute Messages</button>
       <button type="button" data-action="voice">Unmute Sounds</button>
-      <button type="button" data-action="hide">Hide Pet</button>
+      <button type="button" data-action="hide">Hide Pet in Cage</button>
       <p>Drag me, or focus me and use the arrow keys.</p>
     </div>
     <button type="button" class="pet-cat" aria-label="Say hello to the cat. Drag or use arrow keys to move." title="Say hello · drag to move">${CAT}</button>
     <button type="button" class="pet-menu-toggle" aria-label="Cat options" aria-expanded="false" aria-controls="pixel-pet-panel">···</button>
   </div>
-  <button type="button" class="pet-restore" aria-label="Show pixel cat" title="Bring back your companion" hidden>${CAT}<span>show cat</span></button>`;
+  <button type="button" class="pet-restore" aria-label="Let the cat out of its cage" title="Let your companion out" hidden>
+    <span class="pet-cage" aria-hidden="true"><span class="pet-cage-handle"></span><span class="pet-cage-cat">${CAT}</span><span class="pet-cage-bars"></span><span class="pet-cage-latch"></span></span>
+    <span>let cat out</span>
+  </button>`;
   document.body.append(root);
   const companion = root.querySelector('.pet-companion');
   const cat = root.querySelector('.pet-cat');
@@ -90,9 +93,10 @@ export function mountPixelPet({ projects = '#experience', contact = '#contact', 
   let bubbleTimer, stateTimer, drag, suppressClick = false;
   let x = 0, y = 0, tick = 0;
   let playground, sectionGuide, hovering = false;
-  const isBusy = () => document.hidden || preferences.hidden || motion.matches || drag || hovering ||
-    !panel.hidden || !bubble.hidden || root.contains(document.activeElement) ||
+  const isInteractionBusy = () => document.hidden || preferences.hidden || motion.matches || drag || hovering ||
+    !panel.hidden || root.contains(document.activeElement) ||
     document.activeElement?.matches('input, textarea, select, [contenteditable="true"]');
+  const isBusy = () => isInteractionBusy() || !bubble.hidden;
   function stopRoaming() { playground?.stop(); }
   function scheduleRoaming(delay = 6500) { playground?.schedule(delay); }
   function bounds() {
@@ -121,7 +125,7 @@ export function mountPixelPet({ projects = '#experience', contact = '#contact', 
     const v = bounds();
     place(v.left + v.width - root.offsetWidth - 20, v.top + v.height - root.offsetHeight - 20);
   }
-  function state(name = 'idle', duration = 0) {
+  function state(name = preferences.hidden ? 'sleeping' : 'idle', duration = 0) {
     clearTimeout(stateTimer);
     root.dataset.state = name;
     if (duration) stateTimer = setTimeout(() => state(), duration);
@@ -151,14 +155,16 @@ export function mountPixelPet({ projects = '#experience', contact = '#contact', 
     preferences.hidden = hidden;
     companion.hidden = hidden;
     restore.hidden = !hidden;
+    root.classList.toggle('pet-caged', hidden);
     menu(false);
-    state();
+    state(hidden ? 'sleeping' : 'idle');
     playground?.release();
     dock();
     save();
     if (focus) (hidden ? restore : cat).focus({ preventScroll: true });
   }
-  playground = createPlayground({ root, cat, position: () => ({ x, y }), bounds, place, state, busy: isBusy });
+  playground = createPlayground({ root, cat, position: () => ({ x, y }), bounds, place, state,
+    busy: isBusy, scrollBusy: isInteractionBusy });
   mute.setAttribute('aria-pressed', String(preferences.muted));
   visibility(preferences.hidden);
   sectionGuide = watchPetSections(Object.entries(SECTION_MESSAGES).flatMap(([selector, message]) => {
@@ -201,6 +207,7 @@ export function mountPixelPet({ projects = '#experience', contact = '#contact', 
   });
   on(root.querySelector('[data-action="hide"]'), 'click', () => visibility(true, true));
   on(restore, 'click', () => visibility(false, true));
+  on(window, 'resize', () => { if (preferences.hidden) dock(); });
   for (const link of panel.querySelectorAll('a')) on(link, 'click', () => {
     menu(false);
     const id = link.getAttribute('href');

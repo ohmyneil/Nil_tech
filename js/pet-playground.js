@@ -7,8 +7,8 @@ export function jumpVelocity(start, end, ceiling) {
   return { vx: (end.x - start.x) / Math.max(.1, duration), vy, duration };
 }
 
-export function createPlayground({ root, cat, position, bounds, place, state, busy }) {
-  let timer, frame, layoutFrame, flight, support, platforms = [], pointer;
+export function createPlayground({ root, cat, position, bounds, place, state, busy, scrollBusy = busy }) {
+  let timer, frame, layoutFrame, scrollRestTimer, flight, support, platforms = [], pointer;
   let disposed = false, active = false, turn = 0, lastCursorGame = 0;
   let lastScroll = window.scrollY || 0, scrollDelta = 0, scrollDirection = 0, scrollTime = -Infinity;
   const abort = new AbortController();
@@ -56,9 +56,10 @@ export function createPlayground({ root, cat, position, bounds, place, state, bu
   }
   function stop() {
     clearTimeout(timer);
+    clearTimeout(scrollRestTimer);
     cancelAnimationFrame(frame);
     flight = null;
-    if (active) state('idle');
+    if (active || root.classList.contains('pet-roaming')) state('idle');
     active = false;
     root.dataset.airborne = 'false';
     ball.hidden = true;
@@ -171,12 +172,15 @@ export function createPlayground({ root, cat, position, bounds, place, state, bu
   function refresh() {
     cancelAnimationFrame(layoutFrame);
     layoutFrame = requestAnimationFrame(() => {
-      if (disposed) return;
+      if (disposed || root.classList.contains('pet-caged') || document.hidden) {
+        scrollDelta = 0;
+        return;
+      }
       const wasMoving = !!flight;
       if (wasMoving) stop();
       const delta = scrollDelta;
       scrollDelta = 0;
-      const react = delta !== 0 && !busy();
+      const react = delta !== 0 && !scrollBusy();
       measure();
       const platform = support && platforms.find(p => p.element === support.element);
       if (platform) {
@@ -197,8 +201,14 @@ export function createPlayground({ root, cat, position, bounds, place, state, bu
         root.classList.add('pet-roaming');
         root.classList.toggle('pet-facing-left', delta < 0);
         state(Math.abs(delta) > 70 ? 'running' : 'walking');
+        clearTimeout(scrollRestTimer);
+        scrollRestTimer = setTimeout(() => {
+          root.classList.remove('pet-roaming');
+          state('idle');
+          schedule(1200);
+        }, 180);
         // Debounce the next jump, but keep the scroll trot responsive every frame.
-        schedule(250);
+        clearTimeout(timer);
       } else if (wasMoving || !platform) schedule(500);
     });
   }
