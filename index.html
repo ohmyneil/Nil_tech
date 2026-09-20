@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 <link rel="stylesheet" href="css/universe.css">
+<link rel="stylesheet" href="css/pixel-pet.css">
 </head>
 <body>
 <a class="skip-link" href="#about">Skip to content</a>
@@ -18,7 +19,7 @@
   <div class="header-inner shell">
     <a class="brand" href="#top" aria-label="Back to the top">
       <span class="brand-mark">NIT</span>
-      <span>NEIL TANAMOR</span>
+      <span>NEIL IVAN V. TANAMOR</span>
     </a>
     <nav class="nav-links" aria-label="Primary navigation">
       <a href="#about">about</a>
@@ -122,5 +123,9 @@
 </footer>
 
 <script type="module" src="js/main.js"></script>
+<script type="module">
+  import { mountPixelPet } from './js/pixel-pet.js';
+  mountPixelPet({ projects: '#experience', contact: '#contact' });
+</script>
 </body>
 </html>
