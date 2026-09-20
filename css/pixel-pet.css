@@ -101,6 +101,7 @@ body.dark .pixel-pet { --pet-outline: #b9c4ad; --pet-fur: #384336; }
   cursor: pointer;
 }
 .pet-panel a:hover, .pet-panel button:hover { background: var(--page); color: var(--accent); }
+.pet-panel button:disabled { opacity: .55; cursor: not-allowed; }
 .pet-panel button[aria-pressed="true"]::after { content: '✓'; color: var(--accent); }
 .pet-panel p { margin: 8px; color: var(--muted); font-size: 10px; }
 .pet-bubble { padding: 12px 15px; border-radius: 8px 8px 2px 8px; }

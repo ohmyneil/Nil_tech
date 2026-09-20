@@ -29,6 +29,22 @@ inherit the existing theme; fur colors can be customized with `--pet-fur` and
 `--pet-outline` in the component stylesheet.
 Keep `js/pet-playground.js` alongside the component: it supplies platform
 discovery, gravity, landing detection, and behavior scheduling.
+Keep `js/pet-sections.js` alongside it for section detection. Edit
+`SECTION_MESSAGES` in `js/pixel-pet.js` to customize the cat's introductions.
+She introduces the hero, about, tech stack, education/credentials, projects,
+and contact sections when visitors enter them, including return visits.
+Messages wait for scrolling to settle, stay visible for 8.5 seconds, and respect
+mute, hide, reduced-motion, open menus, and form entry.
+
+`js/pet-voice.js` creates short, soft synthesized meows using Web Audio.
+Open the cat's dots menu and select **Unmute Sounds** to enable them;
+**Mute Sounds** stops meows while retaining text bubbles. The cat makes animal
+sounds instead of reading messages aloud. Sounds start muted and the saved
+voice preference from earlier versions is retained. On a return visit, click
+the cat to activate audio for that browser session. **Mute Messages** suppresses
+both bubbles and their accompanying meows. Hiding the pet, opening its menu,
+changing messages, or leaving the tab stops audio. No audio downloads or speech
+services are needed. Browsers without Web Audio retain the text-only companion.
 
 To add it to another page with the same theme variables, include the stylesheet
 and mount once after the page body exists:

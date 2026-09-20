@@ -1,4 +1,17 @@
 import { createPlayground } from './pet-playground.js';
+import { watchPetSections } from './pet-sections.js';
+import { createCatSounds } from './pet-voice.js';
+
+// Edit the cat's section introductions here. #projects contains credentials;
+// #experience contains the portfolio's actual project work.
+const SECTION_MESSAGES = {
+  '.hero': "Hi, I'm your little tour guide! Meet Neil, an IT graduate who loves building useful things.",
+  '#about': "Let's get to know Neil! This section shares his approach to building thoughtful, user-friendly software.",
+  '#skills': "Welcome to Neil's Tech Stack Universe! Explore the languages, frameworks, and tools he works with.",
+  '#projects': "These are Neil's education and credentials! Take a peek at his IT background, certifications, and continued learning.",
+  '#experience': "Here's where ideas become real projects! Explore what Neil built, the tools he used, and the features he worked on.",
+  '#contact': "Have a project or opportunity in mind? This is the place to send Neil a message. I'll let you do the talking!"
+};
 
 // Self-contained pixel artwork: no downloads, libraries, or image requests.
 const CAT = `<svg viewBox="0 0 32 32" shape-rendering="crispEdges" aria-hidden="true">
@@ -31,10 +44,11 @@ export function mountPixelPet({ projects = '#experience', contact = '#contact', 
   const controller = new AbortController();
   const on = (target, event, handler) => target.addEventListener(event, handler, { signal: controller.signal });
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
-  let preferences = { hidden: false, muted: false };
+  const voice = createCatSounds();
+  let preferences = { hidden: false, muted: false, voiceMuted: true };
   try {
     const saved = JSON.parse(localStorage.getItem(storageKey));
-    preferences = { hidden: saved?.hidden === true, muted: saved?.muted === true };
+    preferences = { hidden: saved?.hidden === true, muted: saved?.muted === true, voiceMuted: saved?.voiceMuted !== false };
   } catch { /* Storage may be disabled; the companion still works. */ }
   const save = () => { try { localStorage.setItem(storageKey, JSON.stringify(preferences)); } catch {} };
   const root = document.createElement('aside');
@@ -47,6 +61,7 @@ export function mountPixelPet({ projects = '#experience', contact = '#contact', 
       <a data-action="projects">View Projects <span aria-hidden="true">↗</span></a>
       <a data-action="contact">Contact Me <span aria-hidden="true">↗</span></a>
       <button type="button" data-action="mute" aria-pressed="false">Mute Messages</button>
+      <button type="button" data-action="voice">Unmute Sounds</button>
       <button type="button" data-action="hide">Hide Pet</button>
       <p>Drag me, or focus me and use the arrow keys.</p>
     </div>
@@ -62,11 +77,19 @@ export function mountPixelPet({ projects = '#experience', contact = '#contact', 
   const bubble = root.querySelector('.pet-bubble');
   const restore = root.querySelector('.pet-restore');
   const mute = root.querySelector('[data-action="mute"]');
+  const voiceToggle = root.querySelector('[data-action="voice"]');
+  function updateVoiceToggle() {
+    voiceToggle.disabled = !voice.supported;
+    voiceToggle.textContent = !voice.supported ? 'Sounds unavailable' : preferences.voiceMuted ? 'Unmute Sounds' : 'Mute Sounds';
+    voiceToggle.title = !voice.supported ? 'This browser does not support cat sounds.' :
+      preferences.voiceMuted ? 'Hear little meows from the cat' : 'Turn off meows and keep text messages';
+  }
+  updateVoiceToggle();
   root.querySelector('[data-action="projects"]').setAttribute('href', projects);
   root.querySelector('[data-action="contact"]').setAttribute('href', contact);
   let bubbleTimer, stateTimer, drag, suppressClick = false;
   let x = 0, y = 0, tick = 0;
-  let playground, hovering = false;
+  let playground, sectionGuide, hovering = false;
   const isBusy = () => document.hidden || preferences.hidden || motion.matches || drag || hovering ||
     !panel.hidden || !bubble.hidden || root.contains(document.activeElement) ||
     document.activeElement?.matches('input, textarea, select, [contenteditable="true"]');
@@ -103,13 +126,15 @@ export function mountPixelPet({ projects = '#experience', contact = '#contact', 
     root.dataset.state = name;
     if (duration) stateTimer = setTimeout(() => state(), duration);
   }
-  function silence() { clearTimeout(bubbleTimer); bubble.hidden = true; bubble.textContent = ''; }
-  function say(message) {
+  function silence() { clearTimeout(bubbleTimer); voice.stop(); bubble.hidden = true; bubble.textContent = ''; }
+  function say(message, duration = 5500) {
     if (preferences.muted || preferences.hidden || !panel.hidden) return;
     silence();
+    bubble.setAttribute('aria-live', 'polite');
     bubble.textContent = message;
     bubble.hidden = false;
-    bubbleTimer = setTimeout(silence, 5500);
+    if (!preferences.voiceMuted && voice.ready) voice.meow();
+    bubbleTimer = setTimeout(silence, duration);
   }
   function menu(open, focus = false) {
     stopRoaming();
@@ -120,6 +145,7 @@ export function mountPixelPet({ projects = '#experience', contact = '#contact', 
     state();
     place(x, y);
     if (focus) (open ? panel.querySelector('a') : toggle).focus({ preventScroll: true });
+    if (!open) sectionGuide?.refresh();
   }
   function visibility(hidden, focus = false) {
     preferences.hidden = hidden;
@@ -135,8 +161,21 @@ export function mountPixelPet({ projects = '#experience', contact = '#contact', 
   playground = createPlayground({ root, cat, position: () => ({ x, y }), bounds, place, state, busy: isBusy });
   mute.setAttribute('aria-pressed', String(preferences.muted));
   visibility(preferences.hidden);
+  sectionGuide = watchPetSections(Object.entries(SECTION_MESSAGES).flatMap(([selector, message]) => {
+    const element = document.querySelector(selector);
+    return element ? [{ element, message }] : [];
+  }), message => {
+    if (preferences.hidden || preferences.muted || motion.matches || drag || !panel.hidden ||
+      document.activeElement?.matches('input, textarea, select, [contenteditable="true"]')) return false;
+    stopRoaming();
+    state();
+    say(message, 8500);
+    scheduleRoaming(8800);
+    return true;
+  });
   on(cat, 'click', () => {
     if (suppressClick) { suppressClick = false; return; }
+    voice.unlock();
     menu(false);
     state('happy', 950);
     say('Hi! Welcome to my portfolio!');
@@ -147,6 +186,18 @@ export function mountPixelPet({ projects = '#experience', contact = '#contact', 
     mute.setAttribute('aria-pressed', String(preferences.muted));
     silence();
     save();
+    sectionGuide.refresh();
+  });
+  on(voiceToggle, 'click', () => {
+    voice.unlock();
+    preferences.voiceMuted = !preferences.voiceMuted;
+    voice.stop();
+    updateVoiceToggle();
+    save();
+    if (!preferences.voiceMuted) {
+      menu(false);
+      say('Meow! Cat sounds are on. You can mute them in Cat options.');
+    }
   });
   on(root.querySelector('[data-action="hide"]'), 'click', () => visibility(true, true));
   on(restore, 'click', () => visibility(false, true));
@@ -200,6 +251,7 @@ export function mountPixelPet({ projects = '#experience', contact = '#contact', 
     drag = null;
     root.classList.remove('pet-dragging');
     state();
+    sectionGuide.refresh();
   }
   on(cat, 'pointerup', endDrag);
   on(cat, 'pointercancel', endDrag);
@@ -211,7 +263,8 @@ export function mountPixelPet({ projects = '#experience', contact = '#contact', 
   });
   on(root, 'pointerleave', () => { hovering = false; scheduleRoaming(); });
   on(root, 'focusin', () => stopRoaming());
-  on(motion, 'change', () => { stopRoaming(); silence(); state(); scheduleRoaming(); });
+  on(motion, 'change', () => { stopRoaming(); silence(); state(); scheduleRoaming(); sectionGuide.refresh(); });
+  on(document, 'focusout', () => sectionGuide.refresh());
   on(document, 'visibilitychange', () => {
     stopRoaming();
     root.classList.toggle('pet-paused', document.hidden);
@@ -233,9 +286,11 @@ export function mountPixelPet({ projects = '#experience', contact = '#contact', 
     destroy() {
       controller.abort();
       playground.destroy();
+      sectionGuide.destroy();
       clearInterval(interval);
       clearTimeout(stateTimer);
       clearTimeout(bubbleTimer);
+      voice.destroy();
       root.remove();
     }
   };
